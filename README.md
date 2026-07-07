@@ -19,11 +19,11 @@ Todo Checklist is a T3-stack todo app with username/password authentication, Neo
 - Username and password login/logout
 - Protected `/todos` route
 - User-scoped todo CRUD
+- Kanban-style lanes for `Backlog`, `In Progress`, and `Completed`
 - Completion toggle with strikethrough state
-- Inline editing
-- Filters for `All`, `Active`, and `Completed`
+- Inline editing and status moves
 - Loading, empty, and error states
-- Basic auth tests with Node's built-in test runner
+- Auth and todo tests with Node's built-in test runner
 
 ## Project Structure
 
@@ -94,7 +94,7 @@ See [`.env.example`](./.env.example) for the expected shape.
 - `pnpm build`: production build
 - `pnpm lint`: lint the project
 - `pnpm typecheck`: run TypeScript checks
-- `pnpm test`: run auth tests
+- `pnpm test`: run auth and todo tests
 - `pnpm db:generate`: generate Drizzle migrations
 - `pnpm db:migrate`: apply Drizzle migrations
 - `pnpm db:push`: push schema without generating SQL
@@ -125,7 +125,8 @@ If your shell is not already using the pinned Node version, run `nvm use` first.
 - Show signup with username and password
 - Show login and logout
 - Show protected route behavior
-- Show create/update/delete todo flows
+- Show create/edit/delete todo flows
+- Show moving work across backlog, in-progress, and completed
 - Show completion toggle and strikethrough state
 - Show data loading from Neon on refresh
 - Explain AI-assisted parts and your review process

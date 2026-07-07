@@ -14,33 +14,33 @@ const baseUser = {
 void test(
   "authorizeWithCredentials normalizes username and returns a sanitized user",
   async () => {
-  let lookedUpUsername = "";
+    let lookedUpUsername = "";
 
-  const user = await authorizeWithCredentials(
-    {
-      username: "  Demo ",
-      password: "hunter2",
-    },
-    {
-      findUserByUsername: async (username) => {
-        lookedUpUsername = username;
-        return baseUser;
+    const user = await authorizeWithCredentials(
+      {
+        username: "  Demo ",
+        password: "hunter2",
       },
-      verifyPasswordFn: async (password, storedHash) => {
-        assert.equal(password, "hunter2");
-        assert.equal(storedHash, "stored-hash");
-        return true;
+      {
+        findUserByUsername: async (username) => {
+          lookedUpUsername = username;
+          return baseUser;
+        },
+        verifyPasswordFn: async (password, storedHash) => {
+          assert.equal(password, "hunter2");
+          assert.equal(storedHash, "stored-hash");
+          return true;
+        },
       },
-    },
-  );
+    );
 
-  assert.equal(lookedUpUsername, "demo");
-  assert.deepEqual(user, {
-    id: "user_123",
-    name: "demo",
-    email: "demo@todo.local",
-    username: "demo",
-  });
+    assert.equal(lookedUpUsername, "demo");
+    assert.deepEqual(user, {
+      id: "user_123",
+      name: "demo",
+      email: "demo@todo.local",
+      username: "demo",
+    });
   },
 );
 

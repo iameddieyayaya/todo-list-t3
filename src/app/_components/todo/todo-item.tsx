@@ -8,6 +8,15 @@ import {
   type TodoStatus,
 } from "./todo-types";
 
+const CARD_TONES: Record<TodoStatus, string> = {
+  backlog:
+    "border-amber-200/80 bg-[linear-gradient(180deg,rgba(255,251,235,0.98),rgba(255,247,237,0.94))]",
+  in_progress:
+    "border-sky-200/80 bg-[linear-gradient(180deg,rgba(240,249,255,0.98),rgba(239,246,255,0.94))]",
+  completed:
+    "border-emerald-200/80 bg-[linear-gradient(180deg,rgba(236,253,245,0.98),rgba(240,253,250,0.94))]",
+};
+
 type TodoItemProps = {
   editingId: number | null;
   editingText: string;
@@ -43,14 +52,7 @@ export function TodoItem({
 }: TodoItemProps) {
   const isEditing = editingId === todo.id;
   const createdAt = new Date(todo.createdAt);
-  const cardTone = {
-    backlog:
-      "border-amber-200/80 bg-[linear-gradient(180deg,rgba(255,251,235,0.98),rgba(255,247,237,0.94))]",
-    in_progress:
-      "border-sky-200/80 bg-[linear-gradient(180deg,rgba(240,249,255,0.98),rgba(239,246,255,0.94))]",
-    completed:
-      "border-emerald-200/80 bg-[linear-gradient(180deg,rgba(236,253,245,0.98),rgba(240,253,250,0.94))]",
-  }[todo.status];
+  const cardTone = CARD_TONES[todo.status];
 
   return (
     <li
@@ -65,6 +67,7 @@ export function TodoItem({
             aria-label={
               todo.isCompleted ? "Mark todo active" : "Mark todo completed"
             }
+            aria-pressed={todo.isCompleted}
             className={cn(
               "mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition",
               todo.isCompleted
@@ -102,7 +105,7 @@ export function TodoItem({
             <div className="min-w-0 flex-1 space-y-3">
               <p
                 className={cn(
-                  "text-lg leading-7 text-slate-900",
+                  "break-words text-lg leading-7 text-slate-900",
                   todo.isCompleted && "text-slate-400 line-through decoration-2",
                 )}
               >

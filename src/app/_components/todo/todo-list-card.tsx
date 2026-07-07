@@ -8,10 +8,19 @@ import {
 } from "../ui/card";
 import { TodoBoardColumn } from "./todo-board-column";
 import { TodoSkeleton } from "./todo-skeleton";
-import { BOARD_COLUMNS, type Todo, type TodoStatus } from "./todo-types";
+import { BOARD_COLUMNS, type Todo, type TodoBoard, type TodoStatus } from "./todo-types";
+
+const COLUMN_TONES: Record<TodoStatus, string> = {
+  backlog:
+    "before:absolute before:inset-x-6 before:top-0 before:h-1 before:rounded-full before:bg-amber-300/80 shadow-[0_24px_60px_rgba(245,158,11,0.10)]",
+  in_progress:
+    "before:absolute before:inset-x-6 before:top-0 before:h-1 before:rounded-full before:bg-sky-300/80 shadow-[0_24px_60px_rgba(14,165,233,0.10)]",
+  completed:
+    "before:absolute before:inset-x-6 before:top-0 before:h-1 before:rounded-full before:bg-emerald-300/80 shadow-[0_24px_60px_rgba(16,185,129,0.10)]",
+};
 
 type TodoListCardProps = {
-  board: Record<TodoStatus, Todo[]>;
+  board: TodoBoard;
   editingId: number | null;
   editingText: string;
   isDeletingTodo: (todoId: number) => boolean;
@@ -51,15 +60,6 @@ export function TodoListCard({
   onToggle,
   uiMessage,
 }: TodoListCardProps) {
-  const columnTones: Record<TodoStatus, string> = {
-    backlog:
-      "before:absolute before:inset-x-6 before:top-0 before:h-1 before:rounded-full before:bg-amber-300/80 shadow-[0_24px_60px_rgba(245,158,11,0.10)]",
-    in_progress:
-      "before:absolute before:inset-x-6 before:top-0 before:h-1 before:rounded-full before:bg-sky-300/80 shadow-[0_24px_60px_rgba(14,165,233,0.10)]",
-    completed:
-      "before:absolute before:inset-x-6 before:top-0 before:h-1 before:rounded-full before:bg-emerald-300/80 shadow-[0_24px_60px_rgba(16,185,129,0.10)]",
-  };
-
   return (
     <Card className="overflow-hidden border-slate-200 bg-white/95">
       <CardHeader className="gap-4">
@@ -74,15 +74,26 @@ export function TodoListCard({
           </div>
         </div>
         {uiMessage ? (
-          <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p
+            aria-live="polite"
+            className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            role="alert"
+          >
             {uiMessage}
           </p>
         ) : null}
       </CardHeader>
       <CardContent>
-        {isLoading ? <TodoSkeleton /> : null}
+        {isLoading ? (
+          <div aria-busy="true" aria-live="polite">
+            <TodoSkeleton />
+          </div>
+        ) : null}
         {isError ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
+          <div
+            className="rounded-2xl border border-red-200 bg-red-50 p-5"
+            role="alert"
+          >
             <p className="text-sm text-red-700">
               We couldn&apos;t load your todos right now.
             </p>
@@ -117,7 +128,7 @@ export function TodoListCard({
                   onTextChange={onTextChange}
                   onToggle={onToggle}
                   title={column.title}
-                  tone={columnTones[column.value]}
+                  tone={COLUMN_TONES[column.value]}
                   todos={board[column.value]}
                 />
               ))}

@@ -36,6 +36,7 @@ export function TodoCreateCard({
       <CardContent className="space-y-5">
         <form className="space-y-3" onSubmit={onSubmit}>
           <Input
+            aria-label="New todo"
             name="todo"
             onChange={(event) => onChange(event.target.value)}
             placeholder="Drop a task into backlog..."

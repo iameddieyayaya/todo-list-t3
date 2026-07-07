@@ -7,51 +7,61 @@ import { api } from "~/trpc/react";
 import { TodoCreateCard } from "./todo-create-card";
 import { TodoListCard } from "./todo-list-card";
 import { TodoOverview } from "./todo-overview";
-import { type Todo, type TodoStatus } from "./todo-types";
+import { type Todo, type TodoBoard, type TodoStatus } from "./todo-types";
 
-export function TodoApp({ username }: { username: string }) {
+type TodoAppProps = {
+  username: string;
+};
+
+function createTodoBoard(todos: Todo[]): TodoBoard {
+  return {
+    backlog: todos.filter((todo) => todo.status === "backlog"),
+    in_progress: todos.filter((todo) => todo.status === "in_progress"),
+    completed: todos.filter((todo) => todo.status === "completed"),
+  };
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+export function TodoApp({ username }: TodoAppProps) {
   const utils = api.useUtils();
   const [newTodoText, setNewTodoText] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
   const [uiMessage, setUiMessage] = useState<string | null>(null);
 
+  async function invalidateTodos() {
+    await utils.todo.getAll.invalidate();
+  }
+
   const todosQuery = api.todo.getAll.useQuery();
   const createTodo = api.todo.create.useMutation({
     onSuccess: async () => {
       setNewTodoText("");
-      await utils.todo.getAll.invalidate();
+      await invalidateTodos();
     },
   });
   const updateTodo = api.todo.updateText.useMutation({
     onSuccess: async () => {
       setEditingId(null);
       setEditingText("");
-      await utils.todo.getAll.invalidate();
+      await invalidateTodos();
     },
   });
   const updateTodoStatus = api.todo.updateStatus.useMutation({
-    onSuccess: async () => {
-      await utils.todo.getAll.invalidate();
-    },
+    onSuccess: invalidateTodos,
   });
   const toggleTodo = api.todo.toggleComplete.useMutation({
-    onSuccess: async () => {
-      await utils.todo.getAll.invalidate();
-    },
+    onSuccess: invalidateTodos,
   });
   const deleteTodo = api.todo.delete.useMutation({
-    onSuccess: async () => {
-      await utils.todo.getAll.invalidate();
-    },
+    onSuccess: invalidateTodos,
   });
 
   const todos = todosQuery.data ?? [];
-  const board = {
-    backlog: todos.filter((todo) => todo.status === "backlog"),
-    in_progress: todos.filter((todo) => todo.status === "in_progress"),
-    completed: todos.filter((todo) => todo.status === "completed"),
-  } satisfies Record<TodoStatus, Todo[]>;
+  const board = createTodoBoard(todos);
 
   async function handleCreateTodo(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,9 +70,7 @@ export function TodoApp({ username }: { username: string }) {
     try {
       await createTodo.mutateAsync({ text: newTodoText });
     } catch (error) {
-      setUiMessage(
-        error instanceof Error ? error.message : "Unable to create todo.",
-      );
+      setUiMessage(getErrorMessage(error, "Unable to create todo."));
     }
   }
 
@@ -75,9 +83,7 @@ export function TodoApp({ username }: { username: string }) {
         text: editingText,
       });
     } catch (error) {
-      setUiMessage(
-        error instanceof Error ? error.message : "Unable to save todo.",
-      );
+      setUiMessage(getErrorMessage(error, "Unable to save todo."));
     }
   }
 
@@ -90,9 +96,7 @@ export function TodoApp({ username }: { username: string }) {
         status,
       });
     } catch (error) {
-      setUiMessage(
-        error instanceof Error ? error.message : "Unable to move todo.",
-      );
+      setUiMessage(getErrorMessage(error, "Unable to move todo."));
     }
   }
 
@@ -112,9 +116,7 @@ export function TodoApp({ username }: { username: string }) {
         });
       }
     } catch (error) {
-      setUiMessage(
-        error instanceof Error ? error.message : "Unable to update todo.",
-      );
+      setUiMessage(getErrorMessage(error, "Unable to update todo."));
     }
   }
 
@@ -124,9 +126,7 @@ export function TodoApp({ username }: { username: string }) {
     try {
       await deleteTodo.mutateAsync({ id: todo.id });
     } catch (error) {
-      setUiMessage(
-        error instanceof Error ? error.message : "Unable to delete todo.",
-      );
+      setUiMessage(getErrorMessage(error, "Unable to delete todo."));
     }
   }
 
@@ -147,6 +147,18 @@ export function TodoApp({ username }: { username: string }) {
   function isMutationTarget(mutationId: number | undefined, todoId: number) {
     return mutationId === todoId;
   }
+
+  const isSavingTodo = (todoId: number) =>
+    updateTodo.isPending && isMutationTarget(updateTodo.variables?.id, todoId);
+  const isMovingTodo = (todoId: number) =>
+    updateTodoStatus.isPending &&
+    isMutationTarget(updateTodoStatus.variables?.id, todoId);
+  const isDeletingTodo = (todoId: number) =>
+    deleteTodo.isPending && isMutationTarget(deleteTodo.variables?.id, todoId);
+  const isTogglingTodo = (todoId: number) =>
+    (toggleTodo.isPending && isMutationTarget(toggleTodo.variables?.id, todoId)) ||
+    (updateTodoStatus.isPending &&
+      isMutationTarget(updateTodoStatus.variables?.id, todoId));
 
   const totalCount = todos.length;
   const backlogCount = board.backlog.length;
@@ -175,26 +187,12 @@ export function TodoApp({ username }: { username: string }) {
           board={board}
           editingId={editingId}
           editingText={editingText}
-          isDeletingTodo={(todoId) =>
-            deleteTodo.isPending &&
-            isMutationTarget(deleteTodo.variables?.id, todoId)
-          }
+          isDeletingTodo={isDeletingTodo}
           isError={todosQuery.isError}
           isLoading={todosQuery.isLoading}
-          isMovingTodo={(todoId) =>
-            updateTodoStatus.isPending &&
-            isMutationTarget(updateTodoStatus.variables?.id, todoId)
-          }
-          isSavingTodo={(todoId) =>
-            updateTodo.isPending &&
-            isMutationTarget(updateTodo.variables?.id, todoId)
-          }
-          isTogglingTodo={(todoId) =>
-            (toggleTodo.isPending &&
-              isMutationTarget(toggleTodo.variables?.id, todoId)) ||
-            (updateTodoStatus.isPending &&
-              isMutationTarget(updateTodoStatus.variables?.id, todoId))
-          }
+          isMovingTodo={isMovingTodo}
+          isSavingTodo={isSavingTodo}
+          isTogglingTodo={isTogglingTodo}
           onCancelEdit={clearEditingState}
           onDelete={handleDelete}
           onEdit={startEditing}

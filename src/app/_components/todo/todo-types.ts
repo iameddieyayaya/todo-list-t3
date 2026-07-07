@@ -2,6 +2,7 @@ import { type RouterOutputs } from "~/trpc/react";
 
 export type Todo = RouterOutputs["todo"]["getAll"][number];
 export type TodoStatus = Todo["status"];
+export type TodoBoard = Record<TodoStatus, Todo[]>;
 
 export const BOARD_COLUMNS: Array<{
   description: string;
