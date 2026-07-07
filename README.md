@@ -1,30 +1,140 @@
-# Create T3 App
+# Todo Checklist
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Todo Checklist is a T3-stack todo app with username/password authentication, Neon Postgres persistence, and a responsive Tailwind UI.
 
-## What's next? How do I make an app with this?
+## Stack
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- tRPC
+- NextAuth.js credentials auth
+- Drizzle ORM
+- Neon Postgres
+- pnpm
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Features
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- Username and password signup
+- Username and password login/logout
+- Protected `/todos` route
+- User-scoped todo CRUD
+- Completion toggle with strikethrough state
+- Inline editing
+- Filters for `All`, `Active`, and `Completed`
+- Loading, empty, and error states
+- Basic auth tests with Node's built-in test runner
 
-## Learn More
+## Project Structure
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- `src/app/page.tsx`: public landing page
+- `src/app/todos/page.tsx`: protected todo page
+- `src/app/_components/auth/*`: auth UI components
+- `src/app/_components/todo/*`: todo UI components
+- `src/server/api/routers/auth.ts`: signup API
+- `src/server/api/routers/todo.ts`: todo CRUD API
+- `src/server/auth/*`: NextAuth config and credential logic
+- `src/server/db/schema.ts`: Drizzle schema
+- `drizzle/`: generated SQL migration files
+- `PROMPT.md`: assessment/prompt history for AI-assisted work
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Requirements
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+- Node.js `22.13+`
+- pnpm `11+`
+- Neon Postgres database
 
-## How do I deploy this?
+The repo includes [`.nvmrc`](./.nvmrc) pinned to `22.19.0`.
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
-# todo-list-t3
+## Setup
+
+1. Install dependencies:
+
+```bash
+pnpm install
+```
+
+2. Copy the environment file:
+
+```bash
+cp .env.example .env
+```
+
+3. Generate an auth secret:
+
+```bash
+pnpm exec auth secret
+```
+
+4. Set `DATABASE_URL` to your Neon Postgres connection string.
+
+5. Run migrations:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+6. Start the app:
+
+```bash
+pnpm dev
+```
+
+## Environment Variables
+
+- `AUTH_SECRET`: NextAuth secret
+- `DATABASE_URL`: Neon Postgres connection string
+
+See [`.env.example`](./.env.example) for the expected shape.
+
+## Commands
+
+- `pnpm dev`: run local development server
+- `pnpm build`: production build
+- `pnpm lint`: lint the project
+- `pnpm typecheck`: run TypeScript checks
+- `pnpm test`: run auth tests
+- `pnpm db:generate`: generate Drizzle migrations
+- `pnpm db:migrate`: apply Drizzle migrations
+- `pnpm db:push`: push schema without generating SQL
+- `pnpm db:studio`: open Drizzle Studio
+
+## Verification
+
+Run:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+pnpm test
+```
+
+If your shell is not already using the pinned Node version, run `nvm use` first.
+
+## Assessment Deliverables
+
+- Deploy to Vercel and add the live URL here
+- Push to a private GitHub repository
+- Invite GitHub users `axanthus` and `v3ceban`
+- Record and link a Loom demo
+
+### Loom Demo Checklist
+
+- Show signup with username and password
+- Show login and logout
+- Show protected route behavior
+- Show create/update/delete todo flows
+- Show completion toggle and strikethrough state
+- Show data loading from Neon on refresh
+- Explain AI-assisted parts and your review process
+
+## AI Usage
+
+This repository includes [`PROMPT.md`](./PROMPT.md) to document the take-home instructions and the AI-agent usage guidance from the assessment.
+
+## Notes
+
+- The app currently uses lightweight local UI primitives in `src/app/_components/ui`.
+- If you want stricter alignment with the assessment wording, you can still add official `shadcn/ui` installation metadata and swap some primitives to generated shadcn components.
