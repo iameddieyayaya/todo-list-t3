@@ -11,7 +11,9 @@ const baseUser = {
   passwordHash: "stored-hash",
 };
 
-test("authorizeWithCredentials normalizes username and returns a sanitized user", async () => {
+void test(
+  "authorizeWithCredentials normalizes username and returns a sanitized user",
+  async () => {
   let lookedUpUsername = "";
 
   const user = await authorizeWithCredentials(
@@ -39,9 +41,10 @@ test("authorizeWithCredentials normalizes username and returns a sanitized user"
     email: "demo@todo.local",
     username: "demo",
   });
-});
+  },
+);
 
-test("authorizeWithCredentials rejects invalid passwords", async () => {
+void test("authorizeWithCredentials rejects invalid passwords", async () => {
   const user = await authorizeWithCredentials(
     {
       username: "demo",
@@ -56,22 +59,25 @@ test("authorizeWithCredentials rejects invalid passwords", async () => {
   assert.equal(user, null);
 });
 
-test("authorizeWithCredentials rejects malformed credentials before lookup", async () => {
-  let lookupCalled = false;
+void test(
+  "authorizeWithCredentials rejects malformed credentials before lookup",
+  async () => {
+    let lookupCalled = false;
 
-  const user = await authorizeWithCredentials(
-    {
-      username: "demo",
-      password: "",
-    },
-    {
-      findUserByUsername: async () => {
-        lookupCalled = true;
-        return baseUser;
+    const user = await authorizeWithCredentials(
+      {
+        username: "demo",
+        password: "",
       },
-    },
-  );
+      {
+        findUserByUsername: async () => {
+          lookupCalled = true;
+          return baseUser;
+        },
+      },
+    );
 
-  assert.equal(user, null);
-  assert.equal(lookupCalled, false);
-});
+    assert.equal(user, null);
+    assert.equal(lookupCalled, false);
+  },
+);

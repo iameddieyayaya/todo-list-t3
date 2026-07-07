@@ -1,16 +1,67 @@
-import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import type * as DatabaseModule from "~/server/db";
 import { todos } from "~/server/db/schema";
+import { todoIdSchema, todoTextSchema } from "./todo-input.ts";
+import {
+  createTodo,
+  deleteTodo,
+  toggleTodoComplete,
+  type TodoRepository,
+  updateTodoText,
+} from "./todo-service.ts";
 
-const todoIdSchema = z.number().int().positive();
-const todoTextSchema = z
-  .string()
-  .trim()
-  .min(1, "Todo text cannot be empty.")
-  .max(280, "Todo text must be 280 characters or fewer.");
+type Database = typeof DatabaseModule.db;
+
+const createTodoRepository = (
+  db: Database,
+): TodoRepository => ({
+  create: async ({ userId, text }) => {
+    const [todo] = await db
+      .insert(todos)
+      .values({
+        userId,
+        text,
+      })
+      .returning();
+
+    return todo;
+  },
+  updateText: async ({ id, userId, text, updatedAt }) => {
+    const [todo] = await db
+      .update(todos)
+      .set({
+        text,
+        updatedAt,
+      })
+      .where(and(eq(todos.id, id), eq(todos.userId, userId)))
+      .returning();
+
+    return todo;
+  },
+  toggleComplete: async ({ id, userId, isCompleted, updatedAt }) => {
+    const [todo] = await db
+      .update(todos)
+      .set({
+        isCompleted,
+        updatedAt,
+      })
+      .where(and(eq(todos.id, id), eq(todos.userId, userId)))
+      .returning();
+
+    return todo;
+  },
+  delete: async ({ id, userId }) => {
+    const [todo] = await db
+      .delete(todos)
+      .where(and(eq(todos.id, id), eq(todos.userId, userId)))
+      .returning({ id: todos.id });
+
+    return todo;
+  },
+});
 
 export const todoRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -23,22 +74,10 @@ export const todoRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ text: todoTextSchema }))
     .mutation(async ({ ctx, input }) => {
-      const [todo] = await ctx.db
-        .insert(todos)
-        .values({
-          userId: ctx.session.user.id,
-          text: input.text,
-        })
-        .returning();
-
-      if (!todo) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Unable to create todo.",
-        });
-      }
-
-      return todo;
+      return createTodo(createTodoRepository(ctx.db), {
+        userId: ctx.session.user.id,
+        text: input.text,
+      });
     }),
 
   updateText: protectedProcedure
@@ -48,27 +87,13 @@ export const todoRouter = createTRPCRouter({
         text: todoTextSchema,
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const [todo] = await ctx.db
-        .update(todos)
-        .set({
-          text: input.text,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(eq(todos.id, input.id), eq(todos.userId, ctx.session.user.id)),
-        )
-        .returning();
-
-      if (!todo) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Todo not found.",
-        });
-      }
-
-      return todo;
-    }),
+    .mutation(async ({ ctx, input }) =>
+      updateTodoText(createTodoRepository(ctx.db), {
+        id: input.id,
+        userId: ctx.session.user.id,
+        text: input.text,
+      }),
+    ),
 
   toggleComplete: protectedProcedure
     .input(
@@ -77,45 +102,20 @@ export const todoRouter = createTRPCRouter({
         isCompleted: z.boolean(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const [todo] = await ctx.db
-        .update(todos)
-        .set({
-          isCompleted: input.isCompleted,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(eq(todos.id, input.id), eq(todos.userId, ctx.session.user.id)),
-        )
-        .returning();
-
-      if (!todo) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Todo not found.",
-        });
-      }
-
-      return todo;
-    }),
+    .mutation(async ({ ctx, input }) =>
+      toggleTodoComplete(createTodoRepository(ctx.db), {
+        id: input.id,
+        userId: ctx.session.user.id,
+        isCompleted: input.isCompleted,
+      }),
+    ),
 
   delete: protectedProcedure
     .input(z.object({ id: todoIdSchema }))
-    .mutation(async ({ ctx, input }) => {
-      const [todo] = await ctx.db
-        .delete(todos)
-        .where(
-          and(eq(todos.id, input.id), eq(todos.userId, ctx.session.user.id)),
-        )
-        .returning({ id: todos.id });
-
-      if (!todo) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Todo not found.",
-        });
-      }
-
-      return { success: true };
-    }),
+    .mutation(async ({ ctx, input }) =>
+      deleteTodo(createTodoRepository(ctx.db), {
+        id: input.id,
+        userId: ctx.session.user.id,
+      }),
+    ),
 });
