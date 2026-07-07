@@ -1,6 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-display: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+}
+
+:root {
+  --paper: rgba(255, 255, 255, 0.92);
+  --paper-strong: #f8fafc;
+  --ink: #0f172a;
+  --muted-ink: #475569;
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --danger: #dc2626;
+  --border: rgba(148, 163, 184, 0.24);
+  --border-strong: rgba(100, 116, 139, 0.32);
+}
+
+html {
+  background:
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 30%),
+    radial-gradient(circle at right, rgba(14, 165, 233, 0.1), transparent 24%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+body {
+  color: var(--ink);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.9)),
+    repeating-linear-gradient(
+      0deg,
+      rgba(148, 163, 184, 0.08) 0,
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px,
+      transparent 40px
+    );
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.18);
 }

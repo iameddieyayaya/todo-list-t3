@@ -1,30 +1,107 @@
-# Create T3 App
+# Todo Checklist
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Production-ready Todo Checklist app built with the T3 stack:
 
-## What's next? How do I make an app with this?
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- tRPC
+- NextAuth.js credentials auth
+- Drizzle ORM
+- Neon Postgres
+- pnpm
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## Features
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- Username and password signup/login
+- Protected `/todos` route
+- User-scoped todo CRUD
+- Inline edit, completion toggle, delete
+- Filters for all, active, and completed
+- Loading, empty, and error states
+- Responsive UI designed for Vercel deployment
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+## Requirements
 
-## Learn More
+- Node.js `22.13+`
+- pnpm `11+`
+- A Neon Postgres database
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+The repo includes [`.nvmrc`](./.nvmrc) pinned to `22.19.0`.
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Setup
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+1. Install dependencies:
 
-## How do I deploy this?
+```bash
+pnpm install
+```
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
-# todo-list-t3
+2. Copy the environment file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+3. Generate an auth secret:
+
+```bash
+pnpm exec auth secret
+```
+
+4. Run database migrations:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+5. Start the app:
+
+```bash
+pnpm dev
+```
+
+## Required Environment Variables
+
+- `AUTH_SECRET`: Secret used by NextAuth.
+- `DATABASE_URL`: Neon Postgres connection string.
+
+## Database Commands
+
+- `pnpm db:generate`: Generate SQL migrations from the Drizzle schema.
+- `pnpm db:migrate`: Apply migrations to the configured database.
+- `pnpm db:push`: Push schema changes directly without generating a migration.
+- `pnpm db:studio`: Open Drizzle Studio.
+
+## Verification
+
+Run the required checks:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+```
+
+If your shell defaults to an older Node version, run `nvm use` first.
+
+## Vercel Deployment Notes
+
+- Create a private GitHub repository and push this project.
+- Import the repo into Vercel.
+- Set `AUTH_SECRET` and `DATABASE_URL` in the Vercel project settings.
+- Use the Neon pooled connection string for `DATABASE_URL`.
+- Redeploy after running migrations against the production database.
+
+## Loom Demo Checklist
+
+- Show signup with a new username and password.
+- Show login with the created account.
+- Show that `/todos` redirects unauthenticated users away.
+- Create a todo and refresh to confirm it loads from Neon.
+- Toggle completion and show strikethrough styling.
+- Edit a todo inline and save.
+- Filter by `All`, `Active`, and `Completed`.
+- Delete a todo.
+- Show logout and the protected route behavior after logout.
