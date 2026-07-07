@@ -1,6 +1,8 @@
 # Todo Checklist
 
-Production-ready Todo Checklist app built with the T3 stack:
+Todo Checklist is a T3-stack todo app with username/password authentication, Neon Postgres persistence, and a responsive Tailwind UI.
+
+## Stack
 
 - Next.js App Router
 - TypeScript
@@ -13,19 +15,34 @@ Production-ready Todo Checklist app built with the T3 stack:
 
 ## Features
 
-- Username and password signup/login
+- Username and password signup
+- Username and password login/logout
 - Protected `/todos` route
 - User-scoped todo CRUD
-- Inline edit, completion toggle, delete
-- Filters for all, active, and completed
+- Completion toggle with strikethrough state
+- Inline editing
+- Filters for `All`, `Active`, and `Completed`
 - Loading, empty, and error states
-- Responsive UI designed for Vercel deployment
+- Basic auth tests with Node's built-in test runner
+
+## Project Structure
+
+- `src/app/page.tsx`: public landing page
+- `src/app/todos/page.tsx`: protected todo page
+- `src/app/_components/auth/*`: auth UI components
+- `src/app/_components/todo/*`: todo UI components
+- `src/server/api/routers/auth.ts`: signup API
+- `src/server/api/routers/todo.ts`: todo CRUD API
+- `src/server/auth/*`: NextAuth config and credential logic
+- `src/server/db/schema.ts`: Drizzle schema
+- `drizzle/`: generated SQL migration files
+- `PROMPT.md`: assessment/prompt history for AI-assisted work
 
 ## Requirements
 
 - Node.js `22.13+`
 - pnpm `11+`
-- A Neon Postgres database
+- Neon Postgres database
 
 The repo includes [`.nvmrc`](./.nvmrc) pinned to `22.19.0`.
 
@@ -37,7 +54,7 @@ The repo includes [`.nvmrc`](./.nvmrc) pinned to `22.19.0`.
 pnpm install
 ```
 
-2. Copy the environment file and fill in your values:
+2. Copy the environment file:
 
 ```bash
 cp .env.example .env
@@ -49,59 +66,75 @@ cp .env.example .env
 pnpm exec auth secret
 ```
 
-4. Run database migrations:
+4. Set `DATABASE_URL` to your Neon Postgres connection string.
+
+5. Run migrations:
 
 ```bash
 pnpm db:generate
 pnpm db:migrate
 ```
 
-5. Start the app:
+6. Start the app:
 
 ```bash
 pnpm dev
 ```
 
-## Required Environment Variables
+## Environment Variables
 
-- `AUTH_SECRET`: Secret used by NextAuth.
-- `DATABASE_URL`: Neon Postgres connection string.
+- `AUTH_SECRET`: NextAuth secret
+- `DATABASE_URL`: Neon Postgres connection string
 
-## Database Commands
+See [`.env.example`](./.env.example) for the expected shape.
 
-- `pnpm db:generate`: Generate SQL migrations from the Drizzle schema.
-- `pnpm db:migrate`: Apply migrations to the configured database.
-- `pnpm db:push`: Push schema changes directly without generating a migration.
-- `pnpm db:studio`: Open Drizzle Studio.
+## Commands
+
+- `pnpm dev`: run local development server
+- `pnpm build`: production build
+- `pnpm lint`: lint the project
+- `pnpm typecheck`: run TypeScript checks
+- `pnpm test`: run auth tests
+- `pnpm db:generate`: generate Drizzle migrations
+- `pnpm db:migrate`: apply Drizzle migrations
+- `pnpm db:push`: push schema without generating SQL
+- `pnpm db:studio`: open Drizzle Studio
 
 ## Verification
 
-Run the required checks:
+Run:
 
 ```bash
 pnpm lint
 pnpm typecheck
 pnpm build
+pnpm test
 ```
 
-If your shell defaults to an older Node version, run `nvm use` first.
+If your shell is not already using the pinned Node version, run `nvm use` first.
 
-## Vercel Deployment Notes
+## Assessment Deliverables
 
-- Create a private GitHub repository and push this project.
-- Import the repo into Vercel.
-- Set `AUTH_SECRET` and `DATABASE_URL` in the Vercel project settings.
-- Use the Neon pooled connection string for `DATABASE_URL`.
-- Redeploy after running migrations against the production database.
+- Deploy to Vercel and add the live URL here
+- Push to a private GitHub repository
+- Invite GitHub users `axanthus` and `v3ceban`
+- Record and link a Loom demo
 
-## Loom Demo Checklist
+### Loom Demo Checklist
 
-- Show signup with a new username and password.
-- Show login with the created account.
-- Show that `/todos` redirects unauthenticated users away.
-- Create a todo and refresh to confirm it loads from Neon.
-- Toggle completion and show strikethrough styling.
-- Edit a todo inline and save.
-- Filter by `All`, `Active`, and `Completed`.
-- Delete a todo.
-- Show logout and the protected route behavior after logout.
+- Show signup with username and password
+- Show login and logout
+- Show protected route behavior
+- Show create/update/delete todo flows
+- Show completion toggle and strikethrough state
+- Show data loading from Neon on refresh
+- Explain AI-assisted parts and your review process
+
+## AI Usage
+
+This repository includes [`PROMPT.md`](./PROMPT.md) to document the take-home instructions and the AI-agent usage guidance from the assessment.
+
+## Notes
+
+- The app currently uses lightweight local UI primitives in `src/app/_components/ui`.
+- If you want stricter alignment with the assessment wording, you can still add official `shadcn/ui` installation metadata and swap some primitives to generated shadcn components.
