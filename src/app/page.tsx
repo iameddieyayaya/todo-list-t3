@@ -48,7 +48,7 @@ export default async function Home() {
         <section className="max-w-3xl space-y-10">
           <div className="space-y-6">
             <h1 className="font-[family-name:var(--font-display)] text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
-              Keep your team’s small tasks crisp, private, and easy to finish.
+              Todo T3
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-slate-600">
               A clean checklist experience with credentials auth, Neon-backed

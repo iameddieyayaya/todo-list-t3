@@ -102,11 +102,6 @@ export function AuthPanel() {
       <CardContent className="p-8 pt-0">
         <form className="space-y-5" onSubmit={handleSubmit}>
           <AuthFields mode={mode} />
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
-            {mode === "login"
-              ? "Use the username and password you created during signup."
-              : "Passwords must match before we create the account."}
-          </div>
           {errorMessage ? (
             <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {errorMessage}
