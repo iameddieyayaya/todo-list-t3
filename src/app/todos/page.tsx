@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { TodoApp } from "~/app/_components/todo-app";
+import { TodoApp } from "~/app/_components/todo/todo-app";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
 

@@ -1,14 +1,14 @@
 import { type SyntheticEvent } from "react";
 
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Input } from "./ui/input";
+} from "../ui/card";
+import { Input } from "../ui/input";
 
 type TodoCreateCardProps = {
   isPending: boolean;

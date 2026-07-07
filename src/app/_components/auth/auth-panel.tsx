@@ -8,14 +8,14 @@ import { api } from "~/trpc/react";
 import { AuthFields } from "./auth-fields";
 import { AuthModeToggle } from "./auth-mode-toggle";
 import { type AuthMode } from "./auth-types";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
+} from "../ui/card";
 
 function readFormValue(formData: FormData, key: string) {
   const value = formData.get(key);

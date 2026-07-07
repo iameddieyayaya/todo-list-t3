@@ -1,7 +1,7 @@
 import { cn } from "~/lib/utils";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { dateFormatter, type Todo } from "./todo-types";
 
 type TodoItemProps = {

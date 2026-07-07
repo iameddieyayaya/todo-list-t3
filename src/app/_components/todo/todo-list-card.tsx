@@ -1,11 +1,11 @@
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
+} from "../ui/card";
 import { TodoFilterTabs } from "./todo-filter-tabs";
 import { TodoItem } from "./todo-item";
 import { TodoSkeleton } from "./todo-skeleton";

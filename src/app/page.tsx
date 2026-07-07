@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { AuthPanel } from "~/app/_components/auth-panel";
+import { AuthPanel } from "~/app/_components/auth/auth-panel";
 import { auth } from "~/server/auth";
 
 const featureCards = [

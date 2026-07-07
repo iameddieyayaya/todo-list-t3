@@ -1,5 +1,5 @@
 import { type AuthMode } from "./auth-types";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 
 type AuthFieldsProps = {
   mode: AuthMode;
