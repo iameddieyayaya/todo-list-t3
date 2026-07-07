@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 export const todoIdSchema = z.number().int().positive();
+export const todoStatusSchema = z.enum([
+  "backlog",
+  "in_progress",
+  "completed",
+]);
 
 export const todoTextSchema = z
   .string()

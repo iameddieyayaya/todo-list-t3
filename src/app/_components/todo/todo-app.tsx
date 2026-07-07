@@ -1,17 +1,16 @@
 "use client";
 
-import { type SyntheticEvent, useMemo, useState } from "react";
+import { type SyntheticEvent, useState } from "react";
 import { signOut } from "next-auth/react";
 
 import { api } from "~/trpc/react";
 import { TodoCreateCard } from "./todo-create-card";
 import { TodoListCard } from "./todo-list-card";
 import { TodoOverview } from "./todo-overview";
-import { type Filter, type Todo } from "./todo-types";
+import { type Todo, type TodoStatus } from "./todo-types";
 
 export function TodoApp({ username }: { username: string }) {
   const utils = api.useUtils();
-  const [filter, setFilter] = useState<Filter>("all");
   const [newTodoText, setNewTodoText] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
@@ -31,6 +30,11 @@ export function TodoApp({ username }: { username: string }) {
       await utils.todo.getAll.invalidate();
     },
   });
+  const updateTodoStatus = api.todo.updateStatus.useMutation({
+    onSuccess: async () => {
+      await utils.todo.getAll.invalidate();
+    },
+  });
   const toggleTodo = api.todo.toggleComplete.useMutation({
     onSuccess: async () => {
       await utils.todo.getAll.invalidate();
@@ -42,19 +46,12 @@ export function TodoApp({ username }: { username: string }) {
     },
   });
 
-  const filteredTodos = useMemo(() => {
-    const todos = todosQuery.data ?? [];
-
-    if (filter === "active") {
-      return todos.filter((todo) => !todo.isCompleted);
-    }
-
-    if (filter === "completed") {
-      return todos.filter((todo) => todo.isCompleted);
-    }
-
-    return todos;
-  }, [filter, todosQuery.data]);
+  const todos = todosQuery.data ?? [];
+  const board = {
+    backlog: todos.filter((todo) => todo.status === "backlog"),
+    in_progress: todos.filter((todo) => todo.status === "in_progress"),
+    completed: todos.filter((todo) => todo.status === "completed"),
+  } satisfies Record<TodoStatus, Todo[]>;
 
   async function handleCreateTodo(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -84,14 +81,36 @@ export function TodoApp({ username }: { username: string }) {
     }
   }
 
+  async function handleMove(todo: Todo, status: TodoStatus) {
+    setUiMessage(null);
+
+    try {
+      await updateTodoStatus.mutateAsync({
+        id: todo.id,
+        status,
+      });
+    } catch (error) {
+      setUiMessage(
+        error instanceof Error ? error.message : "Unable to move todo.",
+      );
+    }
+  }
+
   async function handleToggle(todo: Todo) {
     setUiMessage(null);
 
     try {
-      await toggleTodo.mutateAsync({
-        id: todo.id,
-        isCompleted: !todo.isCompleted,
-      });
+      if (todo.status === "completed") {
+        await updateTodoStatus.mutateAsync({
+          id: todo.id,
+          status: "in_progress",
+        });
+      } else {
+        await toggleTodo.mutateAsync({
+          id: todo.id,
+          isCompleted: true,
+        });
+      }
     } catch (error) {
       setUiMessage(
         error instanceof Error ? error.message : "Unable to update todo.",
@@ -129,20 +148,23 @@ export function TodoApp({ username }: { username: string }) {
     return mutationId === todoId;
   }
 
-  const totalCount = todosQuery.data?.length ?? 0;
-  const completedCount =
-    todosQuery.data?.filter((todo) => todo.isCompleted).length ?? 0;
+  const totalCount = todos.length;
+  const backlogCount = board.backlog.length;
+  const inProgressCount = board.in_progress.length;
+  const completedCount = board.completed.length;
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
       <TodoOverview
+        backlogCount={backlogCount}
         completedCount={completedCount}
+        inProgressCount={inProgressCount}
         onLogout={handleLogout}
         totalCount={totalCount}
         username={username}
       />
 
-      <section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+      <section className="grid gap-6 xl:grid-cols-[22rem_minmax(0,1fr)] xl:items-start">
         <TodoCreateCard
           isPending={createTodo.isPending}
           newTodoText={newTodoText}
@@ -150,33 +172,37 @@ export function TodoApp({ username }: { username: string }) {
           onSubmit={handleCreateTodo}
         />
         <TodoListCard
+          board={board}
           editingId={editingId}
           editingText={editingText}
-          filter={filter}
-          filteredTodos={filteredTodos}
           isDeletingTodo={(todoId) =>
             deleteTodo.isPending &&
             isMutationTarget(deleteTodo.variables?.id, todoId)
           }
           isError={todosQuery.isError}
           isLoading={todosQuery.isLoading}
+          isMovingTodo={(todoId) =>
+            updateTodoStatus.isPending &&
+            isMutationTarget(updateTodoStatus.variables?.id, todoId)
+          }
           isSavingTodo={(todoId) =>
             updateTodo.isPending &&
             isMutationTarget(updateTodo.variables?.id, todoId)
           }
           isTogglingTodo={(todoId) =>
-            toggleTodo.isPending &&
-            isMutationTarget(toggleTodo.variables?.id, todoId)
+            (toggleTodo.isPending &&
+              isMutationTarget(toggleTodo.variables?.id, todoId)) ||
+            (updateTodoStatus.isPending &&
+              isMutationTarget(updateTodoStatus.variables?.id, todoId))
           }
           onCancelEdit={clearEditingState}
           onDelete={handleDelete}
           onEdit={startEditing}
-          onFilterChange={setFilter}
+          onMove={handleMove}
           onRetry={todosQuery.refetch}
           onSave={handleSave}
           onTextChange={setEditingText}
           onToggle={handleToggle}
-          totalCount={totalCount}
           uiMessage={uiMessage}
         />
       </section>

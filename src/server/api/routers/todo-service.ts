@@ -7,6 +7,12 @@ type TodoCreateInput = Pick<TodoRecord, "userId" | "text">;
 type TodoUpdateTextInput = Pick<TodoRecord, "id" | "userId" | "text"> & {
   updatedAt: Date;
 };
+type TodoUpdateStatusInput = Pick<
+  TodoRecord,
+  "id" | "userId" | "status" | "isCompleted"
+> & {
+  updatedAt: Date;
+};
 type TodoToggleCompleteInput = Pick<
   TodoRecord,
   "id" | "userId" | "isCompleted"
@@ -18,6 +24,9 @@ type TodoDeleteInput = Pick<TodoRecord, "id" | "userId">;
 export type TodoRepository = {
   create: (input: TodoCreateInput) => Promise<TodoRecord | undefined>;
   updateText: (input: TodoUpdateTextInput) => Promise<TodoRecord | undefined>;
+  updateStatus: (
+    input: TodoUpdateStatusInput,
+  ) => Promise<TodoRecord | undefined>;
   toggleComplete: (
     input: TodoToggleCompleteInput,
   ) => Promise<TodoRecord | undefined>;
@@ -45,6 +54,25 @@ export async function updateTodoText(
   input: Omit<TodoUpdateTextInput, "updatedAt">,
 ) {
   const todo = await repository.updateText({
+    ...input,
+    updatedAt: new Date(),
+  });
+
+  if (!todo) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Todo not found.",
+    });
+  }
+
+  return todo;
+}
+
+export async function updateTodoStatus(
+  repository: TodoRepository,
+  input: Omit<TodoUpdateStatusInput, "updatedAt">,
+) {
+  const todo = await repository.updateStatus({
     ...input,
     updatedAt: new Date(),
   });

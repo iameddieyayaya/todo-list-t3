@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { TRPCError } from "@trpc/server";
 
-import { todoIdSchema, todoTextSchema } from "./todo-input.ts";
+import {
+  todoIdSchema,
+  todoStatusSchema,
+  todoTextSchema,
+} from "./todo-input.ts";
 import {
   createTodo,
   deleteTodo,
@@ -10,12 +14,14 @@ import {
   type TodoRecord,
   type TodoRepository,
   updateTodoText,
+  updateTodoStatus,
 } from "./todo-service.ts";
 
 const baseTodo: TodoRecord = {
   id: 1,
   userId: "user_123",
   text: "Buy groceries",
+  status: "backlog",
   isCompleted: false,
   createdAt: new Date("2026-01-01T00:00:00.000Z"),
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),
@@ -27,6 +33,7 @@ function createRepository(
   return {
     create: async () => baseTodo,
     updateText: async () => baseTodo,
+    updateStatus: async () => baseTodo,
     toggleComplete: async () => baseTodo,
     delete: async () => ({ id: baseTodo.id }),
     ...overrides,
@@ -56,6 +63,13 @@ void test("todoIdSchema accepts positive integer ids only", () => {
   assert.equal(todoIdSchema.safeParse(0).success, false);
   assert.equal(todoIdSchema.safeParse(-1).success, false);
   assert.equal(todoIdSchema.safeParse(1.5).success, false);
+});
+
+void test("todoStatusSchema accepts the three kanban lanes only", () => {
+  assert.equal(todoStatusSchema.parse("backlog"), "backlog");
+  assert.equal(todoStatusSchema.parse("in_progress"), "in_progress");
+  assert.equal(todoStatusSchema.parse("completed"), "completed");
+  assert.equal(todoStatusSchema.safeParse("done").success, false);
 });
 
 void test("createTodo creates a todo for the authenticated user", async () => {
@@ -148,6 +162,42 @@ void test("toggleTodoComplete marks a todo complete", async () => {
   assert.equal(todo.isCompleted, true);
   assert.ok(receivedInput?.updatedAt instanceof Date);
   assert.equal(receivedInput?.isCompleted, true);
+});
+
+void test("updateTodoStatus moves a todo into a new kanban lane", async () => {
+  let receivedInput:
+    | {
+        id: number;
+        isCompleted: boolean;
+        status: "backlog" | "in_progress" | "completed";
+        updatedAt: Date;
+        userId: string;
+      }
+    | undefined;
+
+  const todo = await updateTodoStatus(
+    createRepository({
+      updateStatus: async (input) => {
+        receivedInput = input;
+        return {
+          ...baseTodo,
+          status: input.status,
+          isCompleted: input.isCompleted,
+          updatedAt: input.updatedAt,
+        };
+      },
+    }),
+    {
+      id: 1,
+      status: "in_progress",
+      isCompleted: false,
+      userId: "user_123",
+    },
+  );
+
+  assert.equal(todo.status, "in_progress");
+  assert.equal(todo.isCompleted, false);
+  assert.ok(receivedInput?.updatedAt instanceof Date);
 });
 
 void test("deleteTodo deletes an existing todo", async () => {

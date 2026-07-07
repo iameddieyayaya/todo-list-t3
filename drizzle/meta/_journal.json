@@ -8,6 +8,13 @@
       "when": 1783365088589,
       "tag": "0000_huge_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783450315812,
+      "tag": "0001_known_franklin_richards",
+      "breakpoints": true
     }
   ]
 }

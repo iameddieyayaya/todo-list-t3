@@ -4,13 +4,18 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type * as DatabaseModule from "~/server/db";
 import { todos } from "~/server/db/schema";
-import { todoIdSchema, todoTextSchema } from "./todo-input.ts";
+import {
+  todoIdSchema,
+  todoStatusSchema,
+  todoTextSchema,
+} from "./todo-input.ts";
 import {
   createTodo,
   deleteTodo,
   toggleTodoComplete,
   type TodoRepository,
   updateTodoText,
+  updateTodoStatus,
 } from "./todo-service.ts";
 
 type Database = typeof DatabaseModule.db;
@@ -24,6 +29,7 @@ const createTodoRepository = (
       .values({
         userId,
         text,
+        status: "backlog",
       })
       .returning();
 
@@ -41,10 +47,24 @@ const createTodoRepository = (
 
     return todo;
   },
+  updateStatus: async ({ id, userId, status, isCompleted, updatedAt }) => {
+    const [todo] = await db
+      .update(todos)
+      .set({
+        status,
+        isCompleted,
+        updatedAt,
+      })
+      .where(and(eq(todos.id, id), eq(todos.userId, userId)))
+      .returning();
+
+    return todo;
+  },
   toggleComplete: async ({ id, userId, isCompleted, updatedAt }) => {
     const [todo] = await db
       .update(todos)
       .set({
+        status: isCompleted ? "completed" : "backlog",
         isCompleted,
         updatedAt,
       })
@@ -92,6 +112,21 @@ export const todoRouter = createTRPCRouter({
         id: input.id,
         userId: ctx.session.user.id,
         text: input.text,
+      }),
+    ),
+  updateStatus: protectedProcedure
+    .input(
+      z.object({
+        id: todoIdSchema,
+        status: todoStatusSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) =>
+      updateTodoStatus(createTodoRepository(ctx.db), {
+        id: input.id,
+        userId: ctx.session.user.id,
+        status: input.status,
+        isCompleted: input.status === "completed",
       }),
     ),
 

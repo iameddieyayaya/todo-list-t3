@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   index,
+  pgEnum,
   pgTableCreator,
   primaryKey,
   uniqueIndex,
@@ -14,6 +15,11 @@ import { type AdapterAccount } from "next-auth/adapters";
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
 export const createTable = pgTableCreator((name) => `todo_list_${name}`);
+export const todoStatusEnum = pgEnum("todo_list_todo_status", [
+  "backlog",
+  "in_progress",
+  "completed",
+]);
 
 export const users = createTable(
   "user",
@@ -57,6 +63,7 @@ export const todos = createTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     text: d.varchar({ length: 280 }).notNull(),
+    status: todoStatusEnum().notNull().default("backlog"),
     isCompleted: d.boolean().notNull().default(false),
     createdAt: d
       .timestamp({ withTimezone: true })
@@ -70,6 +77,7 @@ export const todos = createTable(
   }),
   (t) => [
     index("todo_user_id_idx").on(t.userId),
+    index("todo_status_idx").on(t.status),
     index("todo_created_at_idx").on(t.createdAt),
   ],
 );
