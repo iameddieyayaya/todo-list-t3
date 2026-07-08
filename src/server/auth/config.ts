@@ -1,3 +1,5 @@
+// AI-assisted: Codex helped shape this NextAuth credentials configuration and
+// session typing during implementation and cleanup. See PROMPTS.md.
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import { type JWT } from "next-auth/jwt";

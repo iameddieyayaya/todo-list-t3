@@ -1,3 +1,5 @@
+// AI-assisted: Codex helped implement this landing page and auth entry UI from
+// the take-home requirements. See PROMPTS.md.
 import { redirect } from "next/navigation";
 
 import { AuthPanel } from "~/app/_components/auth/auth-panel";

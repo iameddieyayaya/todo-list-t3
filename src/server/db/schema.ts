@@ -1,3 +1,6 @@
+// AI-assisted review: Codex was used to validate this Drizzle schema
+// and compare the approach against familiar Prisma patterns.
+// See PROMPTS.md for related prompts.
 import { relations } from "drizzle-orm";
 import {
   index,

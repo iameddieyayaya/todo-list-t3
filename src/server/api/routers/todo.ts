@@ -1,3 +1,6 @@
+// AI-assisted review: Codex was used to validate this tRPC router structure,
+// auth scoping, and input handling for the todo API.
+// See PROMPTS.md for related prompts.
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 

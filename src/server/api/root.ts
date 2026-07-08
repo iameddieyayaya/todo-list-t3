@@ -1,3 +1,6 @@
+// AI-assisted review: Codex was used to validate the tRPC router wiring
+// and overall API structure for this app.
+// See PROMPTS.md for related prompts.
 import { authRouter } from "~/server/api/routers/auth";
 import { todoRouter } from "~/server/api/routers/todo";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";

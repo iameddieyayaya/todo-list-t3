@@ -1,5 +1,7 @@
 "use client";
 
+// AI-assisted: Codex helped implement this credentials auth form and related
+// client-side signup/login flow. See PROMPTS.md.
 import { type SyntheticEvent, useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";

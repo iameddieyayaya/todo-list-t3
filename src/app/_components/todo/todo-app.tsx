@@ -1,5 +1,7 @@
 "use client";
 
+// AI-assisted: Codex helped implement this todo board container, mutations,
+// and kanban interactions based on the project requirements. See PROMPTS.md.
 import { type SyntheticEvent, useState } from "react";
 import { signOut } from "next-auth/react";
 

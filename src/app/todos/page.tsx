@@ -1,3 +1,5 @@
+// AI-assisted: Codex helped implement this protected todo route and server-side
+// prefetching flow. See PROMPTS.md.
 import { redirect } from "next/navigation";
 
 import { TodoApp } from "~/app/_components/todo/todo-app";

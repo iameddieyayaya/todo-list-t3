@@ -1,3 +1,5 @@
+// AI-assisted: Codex helped implement this signup router from the take-home
+// requirements for credentials auth and user creation. See PROMPTS.md.
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
